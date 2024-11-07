@@ -62,7 +62,11 @@ class TSP_Solver {
 }
 
 export function solve_tsp(coords) {
+    const startTime = Date.now();
     const solver = new TSP_Solver(coords);
     const solution = solver.aStarMSTHeuristic();
+    const endTime = Date.now();
+    const elapsedTime = (endTime - startTime).toFixed(2);
+    console.log(`TSP solved in ${elapsedTime}ms`, solution);
     return solution;
 }

@@ -80,7 +80,8 @@ function App() {
   ];
 
   return (
-    <div id="app" style={{ textAlign: 'center', height: '100vh', width: '100vw' }}>
+    <div id="app" style={{ textAlign: 'center', height: '100vh', width: '100vw',display:'flex',flexDirection:'column',alignItems:'center',overflow:'auto' }}>
+      
       <h1>Traveling Salesman Problem</h1>
       <p>
         It is a problem in which a salesman has to visit all the cities exactly once and return to the starting city with the minimum cost.
@@ -108,7 +109,7 @@ function App() {
         
       {
         isFileUploaded && (
-          <div>
+          <div style={{width:'100%'}}>
             <div id="map-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1vh' }}>
               <VisualizeTSPmap cities={cities} />
             </div>
@@ -134,9 +135,11 @@ function App() {
 
             {
               solution && !isLoading && (
-                <div>
+                <div style={{width:'100%',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center'}}>
                   <h3>Solution</h3>
-                  <p>Best path: {solution.path.join(' -> ')}</p>
+                  <div style={{display:'flex',justifyContent:'center',alignItems:'center',width:'50%'}}>
+                    <p style={{}}>Best path: {solution.path.join(' -> ')}</p>
+                  </div>
                   <p>Cost: {solution.totalCost}</p>
                   <div id="map-solution-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1vh' }}>
                     <VisualizeTSPmap cities={cities} solution={solution.path} />
