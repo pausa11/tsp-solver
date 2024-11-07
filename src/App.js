@@ -116,7 +116,7 @@ function App() {
             <div>
               <h2>Choose a heuristic type</h2>
               <button onClick={() => setHeuristicType('mst')}>MST</button>
-              <button onClick={() => setHeuristicType('ant-colony')}>Ant Colony</button>
+              {/* <button onClick={() => setHeuristicType('ant-colony')}>Ant Colony</button> */}
             </div>
 
             {

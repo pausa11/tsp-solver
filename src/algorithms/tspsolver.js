@@ -1,5 +1,5 @@
 import * as math from 'mathjs';
-import { Graph, alg } from 'graphlib'; // Asegúrate de tener esta dependencia instalada con `npm install graphlib`
+import { Graph, alg } from 'graphlib';
 
 class TSP_Solver {
     constructor(locations) {
@@ -64,7 +64,5 @@ class TSP_Solver {
 export function solve_tsp(coords) {
     const solver = new TSP_Solver(coords);
     const solution = solver.aStarMSTHeuristic();
-    console.log(solution);
     return solution;
-
 }

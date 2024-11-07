@@ -1,70 +1,105 @@
-# Getting Started with Create React App
+# Traveling Salesman Problem Solver
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 
-## Available Scripts
+An interactive web application that solves and visualizes the Traveling Salesman Problem (TSP) using the A* algorithm with Minimum Spanning Tree heuristics.
 
-In the project directory, you can run:
+## 🚀 Features
 
-### `npm start`
+- **Interactive Visualization**: Real-time display of cities and optimal paths on an interactive map
+- **File Support**: Upload and process standard `.tsp` format files
+- **Advanced Algorithm**: Implementation of A* search with MST heuristic for efficient pathfinding
+- **Performance Optimization**: Efficient handling of problems with hundreds of cities
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📋 Prerequisites
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Node.js (v14 or higher)
+- npm or yarn package manager
 
-### `npm test`
+## 🛠️ Installation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. Clone the repository:
+```bash
+git clone https://github.com/your-username/tsp-solver.git
+cd tsp-solver
+```
 
-### `npm run build`
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Start the development server:
+```bash
+npm start
+# or
+yarn start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 💡 How It Works
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Algorithm Implementation
 
-### `npm run eject`
+The solver uses the A* algorithm enhanced with a Minimum Spanning Tree (MST) heuristic:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. **MST Heuristic Calculation**
+   - Creates a minimal-cost tree connecting all cities using Kruskal's algorithm
+   - Provides a lower bound estimate for remaining path costs
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+2. **A* Search Process**
+   - Starts from an initial city
+   - Iteratively selects optimal next cities based on combined actual and estimated costs
+   - Uses the MST heuristic to guide path selection
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Technical Stack
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- **Frontend**: React.js for the user interface
+- **Calculations**: `mathjs` library for distance computations
+- **Graph Operations**: `graphlib` for efficient graph management
 
-## Learn More
+## 📖 Usage Guide
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **Load Your Data**
+   - Upload a `.tsp` file through the interface
+   - Or select from provided example problems
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+2. **Configure Settings**
+   - Select the MST heuristic option
+   - Adjust any visualization preferences
 
-### Code Splitting
+3. **Solve and Visualize**
+   - Click "Solve TSP" to start the algorithm
+   - Watch the solution path develop in real-time
+   - View final route and total distance
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📊 Example Problems
 
-### Analyzing the Bundle Size
+The `/public/tspProblems` directory includes sample datasets:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+| File | Cities | Description |
+|------|---------|-------------|
+| `att48.tsp` | 48 | Standard TSPLIB problem |
+| `ulysses16.tsp` | 16 | Smaller dataset for testing |
+| `a280.tsp` | 280 | Larger challenge problem |
 
-### Making a Progressive Web App
+## 🔜 Roadmap
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- [ ] Implement Ant Colony Optimization algorithm
+- [ ] Add dynamic heuristic selection
+- [ ] Develop backend service for larger datasets
+- [ ] Add support for custom constraints
+- [ ] Implement parallel processing for performance
 
-### Advanced Configuration
+## 🤝 Contributing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Contributions are welcome! Here's how you can help:
 
-### Deployment
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
