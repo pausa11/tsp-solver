@@ -82,12 +82,12 @@ function VisualizeTSPmap({ cities , solution }) {
     }, [cities,solution]);
 
     return (
-        <div id="map-container" style={{width:'100%',height:'60vh'}}>
+        <div id="map-container" style={{width:'100%'}}>
             <canvas
                 ref={canvasRef}
                 width={800}
                 height={600}
-                style={{ border: "1px solid black", width: '100%', height: '100%' }}
+                style={{ border: ".1vh solid black", width: '100%', height: '100%' }}
             />
         </div>
     );

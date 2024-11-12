@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import VisualizeTSPmap from './components/visualizeTSPmap';
 import LoaderSpinner from './components/loaderSpinner';
 import { solve_tsp } from './algorithms/tspsolver';
@@ -11,6 +11,13 @@ function App() {
   const [solution, setSolution] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (isFileUploaded || heuristicType || solution) {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isFileUploaded, heuristicType, solution]);
 
   const handleUpload = () => {
     const file = fileInputRef.current.files[0];
@@ -59,6 +66,7 @@ function App() {
       const solution = solve_tsp(cities, heuristicType);
       setSolution(solution);
       setIsLoading(false);
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -129,6 +137,7 @@ function App() {
             )}
           </div>)
         }
+        <div ref={bottomRef} />
     </div>
   );
 }
