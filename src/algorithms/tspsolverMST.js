@@ -61,7 +61,7 @@ class TSP_Solver {
     }
 }
 
-export function solve_tsp(coords) {
+export function solve_tspMST(coords) {
     const startTime = Date.now();
     const solver = new TSP_Solver(coords);
     const solution = solver.aStarMSTHeuristic();
