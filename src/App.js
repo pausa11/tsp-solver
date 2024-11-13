@@ -88,7 +88,7 @@ function App() {
   ];
 
   return (
-    <div id="app" style={{ textAlign: 'center', height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'auto' ,padding:'1vh'}}>
+    <div id="app" style={{ textAlign: 'center', height: '100vh', width: '100vw', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'auto'}}>
       
         <div id='title' style={{width:'90%'}}>
           <h1>Traveling Salesman Problem</h1>
@@ -98,7 +98,7 @@ function App() {
         <div id="upload-section">
           <h2>Upload a TSP File</h2>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',flexDirection:'column',gap:'2vh' }}>
-            <input type="file" ref={fileInputRef} accept=".tsp" className="file-upload-button" />
+            <input type="file" ref={fileInputRef} accept=".tsp" />
             <button onClick={handleUpload} style={{ marginLeft: '1vh' }}>Upload</button>
           </div>
 
@@ -114,9 +114,9 @@ function App() {
         </div>
 
         {isFileUploaded && (
-          <div id='file-operations' style={{ width: '100%' }}>
+          <div id='file-operations' style={{ width: '95%',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center' }}>
             
-            <div id="map-container" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1vh' }}>
+            <div id="map-container" style={{ width: '95%', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1vh' }}>
               <VisualizeTSPmap cities={cities} />
             </div>
 
