@@ -2,7 +2,7 @@ import * as math from 'mathjs';
 import numeric from 'numeric';
 
 class AntColonyOptimizer {
-  constructor(locations, numAnts = 10, numIterations = 100, alpha = 1.0, beta = 2.0, evaporationRate = 0.5, pheromoneDeposit = 1.0) {
+  constructor(locations, numAnts = 50, numIterations = 200, alpha = 1.0, beta = 2.0, evaporationRate = 0.3, pheromoneDeposit = 1.0) {
     this.locations = locations;
     this.numAnts = numAnts;
     this.numIterations = numIterations;

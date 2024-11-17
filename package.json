@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "fs": "^0.0.1-security",
     "graphlib": "^2.1.8",
+    "js-graph-algorithms": "^1.0.18",
     "leaflet": "^1.9.4",
     "mathjs": "^13.2.1",
     "numeric": "^1.2.6",

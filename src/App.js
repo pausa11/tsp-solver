@@ -3,6 +3,7 @@ import VisualizeTSPmap from './components/visualizeTSPmap';
 import LoaderSpinner from './components/loaderSpinner';
 import { solve_tspMST } from './algorithms/tspsolverMST';
 import { solve_tspACO } from './algorithms/tspsolverACO';
+import { solve_tspACO_MST } from './algorithms/tspsolverACOandMST';
 import './App.css';
 
 function App() {
@@ -76,6 +77,13 @@ function App() {
       setIsLoading(false);
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
+    else if (heuristicType === 'aco_mst' && cities.length > 0) {
+      setIsLoading(true);
+      const solution = solve_tspACO_MST(cities);
+      setSolution(solution);
+      setIsLoading(false);
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
     else {
       alert('Please select a heuristic type');
     }
@@ -124,6 +132,7 @@ function App() {
               <h2>Choose a Heuristic Type</h2>
               <button onClick={() => setHeuristicType('mst')} style={{ marginRight: '1vh' }}>MST</button>
               <button onClick={() => setHeuristicType('aco')} style={{ marginLeft: '1vh' }}>ACO</button>
+              <button onClick={() => setHeuristicType('aco_mst')} style={{ marginLeft: '1vh' }}>ACO with MST</button>
             </div>
 
             {heuristicType && (
