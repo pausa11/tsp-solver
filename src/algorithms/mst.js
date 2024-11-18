@@ -1,6 +1,6 @@
-import * as math from 'mathjs';
-import { Graph } from 'graphlib';
-import PriorityQueue from 'priorityqueuejs';
+const math = require('mathjs');
+const { Graph } = require('graphlib');
+const PriorityQueue = require('priorityqueuejs');
 
 class DisjointSet {
     constructor(size) {
@@ -341,17 +341,73 @@ function solve_tspAStar(coords) {
     return solution;
 }
 
-export function solve_tspMST(coords) {
-    console.log('Iniciando TSP con A* y heurística MST mejorada');
-    console.log(`Número de ciudades: ${coords.length}`);
-    const startTime = Date.now();
-    const solver = new TSP_Solver_AStar(coords);
-    const solution = solver.solve();
-    const endTime = Date.now();
-    const elapsedTime = (endTime - startTime).toFixed(2);
-    console.log('\nResultados finales:');
-    console.log(`Costo total: ${solution.totalCost}`);
-    console.log(`Tiempo total: ${elapsedTime} ms`);
-    console.log(`Ruta: ${solution.path.join(' -> ')}`);
-    return solution;
-}
+// Ejemplo de uso con más ciudades
+const coords = [
+
+    // { x: 38.24, y: 20.42 },
+    // { x: 39.57, y: 26.15 },
+    // { x: 40.56, y: 25.32 },
+    // { x: 36.26, y: 23.12 },
+    // { x: 33.48, y: 10.54 },
+    // { x: 37.56, y: 12.19 },
+    // { x: 38.42, y: 13.11 },
+    // { x: 37.52, y: 20.44 },
+    // { x: 41.23, y: 9.10 },
+    // { x: 41.17, y: 13.05 },
+    // { x: 36.08, y: -5.21 },
+    // { x: 38.47, y: 15.13 },
+    // { x: 38.15, y: 15.35 },
+    // { x: 37.51, y: 15.17 },
+    // { x: 35.49, y: 14.32 },
+
+    { x: 6734, y: 1453 },
+    { x: 2233, y: 10 },
+    { x: 5530, y: 1424 },
+    { x: 401, y: 841 },
+    { x: 3082, y: 1644 },
+    { x: 7608, y: 4458 },
+    { x: 7573, y: 3716 },
+    { x: 7265, y: 1268 },
+    { x: 6898, y: 1885 },
+    { x: 1112, y: 2049 },
+    { x: 5468, y: 2606 },
+    { x: 5989, y: 2873 },
+    { x: 4706, y: 2674 },
+    { x: 4612, y: 2035 },
+    { x: 6347, y: 2683 },
+    { x: 6107, y: 669 },
+    { x: 7611, y: 5184 },
+    { x: 7462, y: 3590 },
+    { x: 7732, y: 4723 },
+    { x: 5900, y: 3561 },
+    { x: 4483, y: 3369 },
+    { x: 6101, y: 1110 },
+    { x: 5199, y: 2182 },
+    { x: 1633, y: 2809 },
+    { x: 4307, y: 2322 },
+    { x: 675, y: 1006 },
+    { x: 7555, y: 4819 },
+    { x: 7541, y: 3981 },
+    { x: 3177, y: 756 },
+    { x: 7352, y: 4506 },
+    { x: 7545, y: 2801 },
+    { x: 3245, y: 3305 },
+    { x: 6426, y: 3173 },
+    { x: 4608, y: 1198 },
+    { x: 23, y: 2216 },
+    { x: 7248, y: 3779 },
+    { x: 7762, y: 4595 },
+    { x: 7392, y: 2244 },
+    { x: 3484, y: 2829 },
+    { x: 6271, y: 2135 },
+    { x: 4985, y: 140 },
+    { x: 1916, y: 1569 },
+    { x: 7280, y: 4899 },
+    { x: 7509, y: 3239 },
+    { x: 10, y: 2676 },
+    { x: 6807, y: 2993 },
+    { x: 5185, y: 3258 },
+    { x: 3023, y: 1942 }
+];
+
+console.log(solve_tspAStar(coords));
