@@ -228,6 +228,7 @@ function App() {
 
         <div id="upload-section">
           <h2>Upload a TSP File</h2>
+          <p>you can download tsp files from <a href="https://github.com/mastqe/tsplib/tree/master" target="_blank" rel="noreferrer">TSPLIB</a></p>
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',flexDirection:'column',gap:'2vh' }}>
             <input type="file" ref={fileInputRef} accept=".tsp" />
             <button onClick={handleUpload} style={{ marginLeft: '1vh' }}>Upload</button>
