@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+
 import * as math from 'mathjs';
 import { Graph } from 'graphlib';
 import PriorityQueue from 'priorityqueuejs';
@@ -466,23 +468,6 @@ class TSP_Solver_AStar {
     }
 }
 
-export function solveTSP(coords) {
-    console.log('Iniciando TSP con A* y heurística ACO');
-    console.log(`Número de ciudades: ${coords.length}`);
-    const startTime = Date.now();
-
-    const solver = new TSP_Solver_AStar(coords);
-    const solution = solver.solve();
-
-    const endTime = Date.now();
-
-    console.log('\nResultados finales:');
-    console.log(`Costo total: ${solution.totalCost}`);
-    console.log(`Ruta: ${solution.path.join(' -> ')}`);
-    
-    return solution;
-}
-
 // function solve_tspACO_MST(coords) {
 //   console.log('Iniciando TSP con A* y heurística ACO');
 //   console.log(`Número de ciudades: ${coords.length}`);
@@ -499,3 +484,37 @@ export function solveTSP(coords) {
   
 //   return solution;
 // }
+
+
+self.onmessage = function(e) {
+    const { type, data } = e.data;
+    
+    if (type === 'solve') {
+        try {
+            console.log('Worker: Starting TSP solution');
+            const solver = new TSP_Solver_AStar(data);
+            const solution = solver.solve();
+            
+            // Enviar actualizaciones de progreso
+            const progressUpdate = {
+                type: 'progress',
+                data: {
+                    nodesExplored: solver.nodesExplored,
+                    currentBest: solver.bestSolution?.totalCost
+                }
+            };
+            self.postMessage(progressUpdate);
+            
+            // Enviar la solución final
+            self.postMessage({
+                type: 'solution',
+                data: solution
+            });
+        } catch (error) {
+            self.postMessage({
+                type: 'error',
+                data: error.message
+            });
+        }
+    }
+}

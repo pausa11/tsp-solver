@@ -1,9 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import VisualizeTSPmap from './components/visualizeTSPmap';
 import LoaderSpinner from './components/loaderSpinner';
-import { solve_tspMST } from './algorithms/tspsolverMST';
-import { solve_tspACO } from './algorithms/tspsolverACO';
-import { solve_tspACO_MST } from './algorithms/tspsolverACOandMST';
 import './App.css';
 
 function App() {
@@ -14,6 +11,126 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef(null);
   const bottomRef = useRef(null);
+  const mstWorkerRef = useRef(null);
+  const acoWorkerRef = useRef(null);
+  const mstAndAcoWorkerRef = useRef(null);
+  //eslint-disable-next-line
+  const [progress, setProgress] = useState(null);
+
+  useEffect(() => {
+    // Inicializar el Worker de MST
+    mstWorkerRef.current = new Worker(new URL('./workers/tspsolverMSTWorker.worker.js', import.meta.url), { type: 'module' });
+
+    // Configurar el manejador de mensajes para el Worker de MST
+    mstWorkerRef.current.onmessage = (e) => {
+      const { type, data } = e.data;
+      
+      switch (type) {
+        case 'solution':
+          setSolution(data);
+          setIsLoading(false);
+          setProgress(null);
+          break;
+          
+        case 'progress':
+          setProgress(data);
+          break;
+          
+        case 'error':
+          console.error('Error en el Worker MST:', data);
+          setIsLoading(false);
+          alert(`Error al resolver TSP con MST: ${data}`);
+          break;
+          
+        default:
+          console.warn('Mensaje no reconocido del Worker MST:', type);
+      }
+    };
+
+    // Inicializar el Worker de ACO
+    acoWorkerRef.current = new Worker(new URL('./workers/tspsolverACOWorker.worker.js', import.meta.url), { type: 'module' });
+
+    // Configurar el manejador de mensajes para el Worker de ACO
+    acoWorkerRef.current.onmessage = (e) => {
+      const { type, data } = e.data;
+      
+      switch (type) {
+        case 'solution':
+          setSolution(data);
+          setIsLoading(false);
+          setProgress(null);
+          break;
+          
+        case 'progress':
+          setProgress(data);
+          break;
+          
+        case 'error':
+          console.error('Error en el Worker ACO:', data);
+          setIsLoading(false);
+          alert(`Error al resolver TSP con ACO: ${data}`);
+          break;
+          
+        default:
+          console.warn('Mensaje no reconocido del Worker ACO:', type);
+      }
+    };
+
+    mstAndAcoWorkerRef.current = new Worker(new URL('./workers/tspsolverAcoAndMstWorker.worker.js', import.meta.url), { type: 'module' });
+
+    // Configurar el manejador de mensajes para el Worker de ACO con MST
+    mstAndAcoWorkerRef.current.onmessage = (e) => {
+      const { type, data } = e.data;
+      
+      switch (type) {
+        case 'solution':
+          setSolution(data);
+          setIsLoading(false);
+          setProgress(null);
+          break;
+          
+        case 'progress':
+          setProgress(data);
+          break;
+          
+        case 'error':
+          console.error('Error en el Worker ACO con MST:', data);
+          setIsLoading(false);
+          alert(`Error al resolver TSP con ACO con MST: ${data}`);
+          break;
+          
+        default:
+          console.warn('Mensaje no reconocido del Worker ACO con MST:', type);
+      }
+    };
+
+    // Manejar errores de los Workers
+    const handleWorkerError = (error, workerType) => {
+      console.error(`Error en el Worker ${workerType}:`, error);
+      setIsLoading(false);
+      alert(`Error en el Worker ${workerType}: ${error.message}`);
+    };
+
+    mstWorkerRef.current.onerror = (error) => handleWorkerError(error, 'MST');
+    acoWorkerRef.current.onerror = (error) => handleWorkerError(error, 'ACO');
+    mstAndAcoWorkerRef.current.onerror = (error) => handleWorkerError(error, 'ACO con MST');
+
+    // Limpiar los Workers cuando el componente se desmonte
+    return () => {
+      if (mstWorkerRef.current) {
+        mstWorkerRef.current.terminate();
+        console.log('Worker MST terminado');
+      }
+      if (acoWorkerRef.current) {
+        acoWorkerRef.current.terminate();
+        console.log('Worker ACO terminado');
+      }
+      if (mstAndAcoWorkerRef.current) {
+        mstAndAcoWorkerRef.current.terminate();
+        console.log('Worker ACO con MST terminado');
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isFileUploaded || heuristicType || solution) {
@@ -63,25 +180,31 @@ function App() {
   };
 
   const handleSolveTSP = () => {
+    setIsLoading(true);
+    setSolution(null); // Limpiar solución anterior
+    setProgress(null); // Limpiar progreso anterior
     if (heuristicType === 'mst' && cities.length > 0) {
       setIsLoading(true);
-      const solution = solve_tspMST(cities);
-      setSolution(solution);
-      setIsLoading(false);
+      mstWorkerRef.current.postMessage({
+        type: 'solve',
+        data: cities
+      });
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
     else if (heuristicType === 'aco' && cities.length > 0) {
       setIsLoading(true);
-      const solution = solve_tspACO(cities);
-      setSolution(solution);
-      setIsLoading(false);
+      acoWorkerRef.current.postMessage({
+        type: 'solve',
+        data: cities
+      });
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
     else if (heuristicType === 'aco_mst' && cities.length > 0) {
       setIsLoading(true);
-      const solution = solve_tspACO_MST(cities);
-      setSolution(solution);
-      setIsLoading(false);
+      mstAndAcoWorkerRef.current.postMessage({
+        type: 'solve',
+        data: cities
+      });
       bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
     else {

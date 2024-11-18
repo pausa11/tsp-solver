@@ -1,114 +1,35 @@
+/* eslint-disable no-restricted-globals */
+
 import * as math from 'mathjs';
 import { Graph } from 'graphlib';
 import PriorityQueue from 'priorityqueuejs';
 
-class AntColony {
-    constructor(distanceMatrix, numAnts = 100, iterations = 50, evaporationRate = 0.2, alpha = 1, beta = 3) {
-        this.distanceMatrix = distanceMatrix;
-        this.numCities = distanceMatrix.length;
-        this.numAnts = numAnts;
-        this.iterations = iterations;
-        this.evaporationRate = evaporationRate;
-        this.alpha = alpha;
-        this.beta = beta;
-        this.pheromoneMatrix = Array(this.numCities).fill().map(() => 
-            Array(this.numCities).fill(1.0 / this.numCities)
-        );
-        this.bestTourLength = Infinity;
-        this.bestTour = null;
+class DisjointSet {
+    constructor(size) {
+        this.parent = Array.from({ length: size }, (_, i) => i);
+        this.rank = Array(size).fill(0);
     }
 
-    runIteration(startCity, visitedNodes) {
-        let bestIterationLength = Infinity;
-        let bestIterationTour = null;
-
-        // Para cada hormiga
-        for (let ant = 0; ant < this.numAnts; ant++) {
-            const tour = this.constructSolution(startCity, visitedNodes);
-            const tourLength = this.calculateTourLength(tour);
-
-            if (tourLength < bestIterationLength) {
-                bestIterationLength = tourLength;
-                bestIterationTour = [...tour];
-            }
-
-            if (tourLength < this.bestTourLength) {
-                this.bestTourLength = tourLength;
-                this.bestTour = [...tour];
-            }
+    find(x) {
+        if (this.parent[x] !== x) {
+            this.parent[x] = this.find(this.parent[x]);
         }
-
-        this.updatePheromones(bestIterationTour, bestIterationLength);
-        return bestIterationLength;
+        return this.parent[x];
     }
 
-    constructSolution(startCity, visitedNodes) {
-        const available = new Array(this.numCities).fill(true);
-        visitedNodes.forEach(node => available[node] = false);
-        
-        const tour = [startCity];
-        let currentCity = startCity;
+    union(x, y) {
+        const rootX = this.find(x);
+        const rootY = this.find(y);
 
-        while (tour.length < this.numCities - visitedNodes.length + 1) {
-            const nextCity = this.selectNextCity(currentCity, available);
-            tour.push(nextCity);
-            available[nextCity] = false;
-            currentCity = nextCity;
-        }
-
-        return tour;
-    }
-
-    selectNextCity(currentCity, available) {
-        const probabilities = [];
-        let totalProbability = 0;
-
-        for (let city = 0; city < this.numCities; city++) {
-            if (available[city]) {
-                const pheromone = Math.pow(this.pheromoneMatrix[currentCity][city], this.alpha);
-                const distance = 1.0 / Math.pow(this.distanceMatrix[currentCity][city], this.beta);
-                const probability = pheromone * distance;
-                probabilities.push({ city, probability });
-                totalProbability += probability;
+        if (rootX !== rootY) {
+            if (this.rank[rootX] < this.rank[rootY]) {
+                this.parent[rootX] = rootY;
+            } else if (this.rank[rootX] > this.rank[rootY]) {
+                this.parent[rootY] = rootX;
+            } else {
+                this.parent[rootY] = rootX;
+                this.rank[rootX]++;
             }
-        }
-
-        let random = Math.random() * totalProbability;
-        let sum = 0;
-
-        for (const { city, probability } of probabilities) {
-            sum += probability;
-            if (random <= sum) {
-                return city;
-            }
-        }
-
-        return probabilities[probabilities.length - 1].city;
-    }
-
-    calculateTourLength(tour) {
-        let length = 0;
-        for (let i = 0; i < tour.length - 1; i++) {
-            length += this.distanceMatrix[tour[i]][tour[i + 1]];
-        }
-        return length;
-    }
-
-    updatePheromones(tour, tourLength) {
-        // Evaporación
-        for (let i = 0; i < this.numCities; i++) {
-            for (let j = 0; j < this.numCities; j++) {
-                this.pheromoneMatrix[i][j] *= (1 - this.evaporationRate);
-            }
-        }
-
-        // Depósito de feromonas
-        const pheromoneDeposit = 1.0 / tourLength;
-        for (let i = 0; i < tour.length - 1; i++) {
-            const from = tour[i];
-            const to = tour[i + 1];
-            this.pheromoneMatrix[from][to] += pheromoneDeposit;
-            this.pheromoneMatrix[to][from] += pheromoneDeposit;
         }
     }
 }
@@ -120,13 +41,13 @@ class TSP_Solver_AStar {
         this.startNode = 0;
         this.totalNodes = locations.length;
         this.memoizedHeuristics = new Map();
-        this.timeLimit = 99000;
+        this.timeLimit = 99000; // 15 segundos
         this.startTime = Date.now();
         this.bestSolution = null;
         this.lastUpdate = Date.now();
         this.distanceMatrix = this.createDistanceMatrix();
-        this.antColony = new AntColony(this.distanceMatrix);
         
+        // Crear array de visitados inicial
         this.initialVisited = new Array(this.totalNodes).fill(false);
         this.initialVisited[this.startNode] = true;
     }
@@ -167,27 +88,87 @@ class TSP_Solver_AStar {
         return this.distanceMatrix[from][to];
     }
 
+    // Función para convertir array de visitados a string para usar como clave en el cache
     visitedToString(visited, currentNode) {
         return `${currentNode}-${visited.join('')}`;
     }
 
-    getVisitedNodes(visited) {
-        return visited.reduce((acc, v, i) => {
-            if (v) acc.push(i);
-            return acc;
-        }, []);
+    // Función para obtener nodos no visitados
+    getUnvisitedNodes(visited) {
+        const unvisited = [];
+        for (let i = 0; i < this.totalNodes; i++) {
+            if (!visited[i]) {
+                unvisited.push(i);
+            }
+        }
+        return unvisited;
     }
 
-    calculateACOHeuristic(currentNode, visited) {
+    kruskalMST(unvisitedNodes) {
+        if (unvisitedNodes.length <= 1) return 0;
+        
+        const edges = [];
+        const n = unvisitedNodes.length;
+        
+        for (let i = 0; i < n; i++) {
+            const node1 = unvisitedNodes[i];
+            for (let j = i + 1; j < n; j++) {
+                const node2 = unvisitedNodes[j];
+                edges.push({
+                    v: node1,
+                    w: node2,
+                    weight: this.getDistance(node1, node2)
+                });
+            }
+        }
+
+        edges.sort((a, b) => a.weight - b.weight);
+        const ds = new DisjointSet(this.totalNodes);
+        let mstCost = 0;
+        let edgesUsed = 0;
+        const neededEdges = n - 1;
+
+        for (const edge of edges) {
+            if (ds.find(edge.v) !== ds.find(edge.w)) {
+                mstCost += edge.weight;
+                ds.union(edge.v, edge.w);
+                edgesUsed++;
+                if (edgesUsed === neededEdges) break;
+            }
+        }
+
+        return mstCost;
+    }
+
+    calculateMSTHeuristic(currentNode, visited) {
+        const unvisitedNodes = this.getUnvisitedNodes(visited);
+        if (unvisitedNodes.length === 0) return 0;
+
         const memoKey = this.visitedToString(visited, currentNode);
         const cached = this.memoizedHeuristics.get(memoKey);
         if (cached !== undefined) {
             return cached;
         }
 
-        const visitedNodes = this.getVisitedNodes(visited);
-        const heuristicValue = this.antColony.runIteration(currentNode, visitedNodes);
-        
+        // Si solo queda un nodo por visitar, la heurística es la distancia directa
+        if (unvisitedNodes.length === 1) {
+            const hValue = this.getDistance(currentNode, unvisitedNodes[0]);
+            this.memoizedHeuristics.set(memoKey, hValue);
+            return hValue;
+        }
+
+        const mstCost = this.kruskalMST(unvisitedNodes);
+
+        // Encontrar la distancia mínima desde el nodo actual a cualquier nodo no visitado
+        let minToUnvisited = Infinity;
+        for (const node of unvisitedNodes) {
+            const dist = this.getDistance(currentNode, node);
+            if (dist < minToUnvisited) {
+                minToUnvisited = dist;
+            }
+        }
+
+        const heuristicValue = mstCost + minToUnvisited;
         this.memoizedHeuristics.set(memoKey, heuristicValue);
         return heuristicValue;
     }
@@ -206,6 +187,7 @@ class TSP_Solver_AStar {
     }
 
     findInitialSolution() {
+        // Encuentra una solución inicial usando el vecino más cercano
         const visited = new Array(this.totalNodes).fill(false);
         visited[this.startNode] = true;
         let currentNode = this.startNode;
@@ -232,6 +214,7 @@ class TSP_Solver_AStar {
             currentNode = nearestNode;
         }
         
+        // Agregar el costo de retorno al nodo inicial
         totalCost += this.getDistance(currentNode, this.startNode);
         path.push(this.startNode);
         
@@ -242,6 +225,7 @@ class TSP_Solver_AStar {
     }
 
     solve() {
+        // Encontrar una solución inicial usando el vecino más cercano
         this.bestSolution = this.findInitialSolution();
         console.log(`Solución inicial encontrada: ${this.bestSolution.totalCost}`);
 
@@ -252,7 +236,7 @@ class TSP_Solver_AStar {
             visited: [...this.initialVisited],
             path: [this.startNode],
             g: 0,
-            h: this.calculateACOHeuristic(this.startNode, this.initialVisited),
+            h: this.calculateMSTHeuristic(this.startNode, this.initialVisited),
             f: 0
         };
         startState.f = startState.g + startState.h;
@@ -269,6 +253,7 @@ class TSP_Solver_AStar {
                 return this.bestSolution;
             }
 
+            // Actualizar progreso cada segundo
             if (currentTime - lastProgressUpdate > 1000) {
                 console.log(`Progreso: ${nodesExplored} nodos explorados, mejor solución: ${this.bestSolution.totalCost}`);
                 lastProgressUpdate = currentTime;
@@ -277,6 +262,7 @@ class TSP_Solver_AStar {
             const state = openSet.deq();
             nodesExplored++;
 
+            // Verificar si hemos visitado todos los nodos
             if (this.countVisited(state.visited) === this.totalNodes) {
                 const returnCost = this.getDistance(state.currentNode, this.startNode);
                 const totalCost = state.g + returnCost;
@@ -291,10 +277,12 @@ class TSP_Solver_AStar {
                 continue;
             }
 
+            // Podar ramas no prometedoras
             if (this.bestSolution && state.f >= this.bestSolution.totalCost * 1.1) {
                 continue;
             }
 
+            // Explorar vecinos no visitados
             for (let neighbor = 0; neighbor < this.totalNodes; neighbor++) {
                 if (!state.visited[neighbor]) {
                     const newVisited = [...state.visited];
@@ -306,7 +294,7 @@ class TSP_Solver_AStar {
                         continue;
                     }
 
-                    const hCost = this.calculateACOHeuristic(neighbor, newVisited);
+                    const hCost = this.calculateMSTHeuristic(neighbor, newVisited);
                     const fCost = gCost + hCost;
 
                     if (this.bestSolution && fCost >= this.bestSolution.totalCost) {
@@ -324,6 +312,7 @@ class TSP_Solver_AStar {
                 }
             }
 
+            // Liberar memoria periódicamente
             if (nodesExplored % 10000 === 0) {
                 if (this.memoizedHeuristics.size > 1000000) {
                     this.memoizedHeuristics.clear();
@@ -335,36 +324,35 @@ class TSP_Solver_AStar {
     }
 }
 
-// function solve_tspAStar(coords) {
-//     console.log('Iniciando TSP con A* y heurística ACO');
-//     console.log(`Número de ciudades: ${coords.length}`);
-//     const startTime = Date.now();
+self.onmessage = function(e) {
+    const { type, data } = e.data;
     
-//     const solver = new TSP_Solver_AStar(coords);
-//     const solution = solver.solve();
-    
-//     const endTime = Date.now();
-//     const timeElapsed = (endTime - startTime) / 1000;
-    
-//     console.log('\nResultados finales:');
-//     console.log(`Costo total: ${solution.totalCost}`);
-//     console.log(`Tiempo total: ${timeElapsed} segundos`);
-//     console.log(`Ruta: ${solution.path.join(' -> ')}`);
-    
-//     return solution;
-// }
-
-export function solve_tspACO(coords) {
-  console.log('Iniciando TSP con A* y heurística ACO');
-  console.log(`Número de ciudades: ${coords.length}`);
-  const startTime = Date.now();
-  const solver = new TSP_Solver_AStar(coords);
-  const solution = solver.solve();
-  const endTime = Date.now();
-  const timeElapsed = (endTime - startTime) / 1000;
-  console.log('\nResultados finales:');
-  console.log(`Costo total: ${solution.totalCost}`);
-  console.log(`Tiempo total: ${timeElapsed} segundos`);
-  console.log(`Ruta: ${solution.path.join(' -> ')}`);
-  return solution;
-}   
+    if (type === 'solve') {
+        try {
+            console.log('Worker: Starting TSP solution');
+            const solver = new TSP_Solver_AStar(data);
+            const solution = solver.solve();
+            
+            // Enviar actualizaciones de progreso
+            const progressUpdate = {
+                type: 'progress',
+                data: {
+                    nodesExplored: solver.nodesExplored,
+                    currentBest: solver.bestSolution?.totalCost
+                }
+            };
+            self.postMessage(progressUpdate);
+            
+            // Enviar la solución final
+            self.postMessage({
+                type: 'solution',
+                data: solution
+            });
+        } catch (error) {
+            self.postMessage({
+                type: 'error',
+                data: error.message
+            });
+        }
+    }
+}

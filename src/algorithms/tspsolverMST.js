@@ -322,24 +322,24 @@ class TSP_Solver_AStar {
     }
 }
 
-function solve_tspAStar(coords) {
-    console.log('Iniciando TSP con A* y heurística MST mejorada');
-    console.log(`Número de ciudades: ${coords.length}`);
-    const startTime = Date.now();
+// function solve_tspAStar(coords) {
+//     console.log('Iniciando TSP con A* y heurística MST mejorada');
+//     console.log(`Número de ciudades: ${coords.length}`);
+//     const startTime = Date.now();
     
-    const solver = new TSP_Solver_AStar(coords);
-    const solution = solver.solve();
+//     const solver = new TSP_Solver_AStar(coords);
+//     const solution = solver.solve();
     
-    const endTime = Date.now();
-    const timeElapsed = (endTime - startTime) / 1000;
+//     const endTime = Date.now();
+//     const timeElapsed = (endTime - startTime) / 1000;
     
-    console.log('\nResultados finales:');
-    console.log(`Costo total: ${solution.totalCost}`);
-    console.log(`Tiempo total: ${timeElapsed} segundos`);
-    console.log(`Ruta: ${solution.path.join(' -> ')}`);
+//     console.log('\nResultados finales:');
+//     console.log(`Costo total: ${solution.totalCost}`);
+//     console.log(`Tiempo total: ${timeElapsed} segundos`);
+//     console.log(`Ruta: ${solution.path.join(' -> ')}`);
     
-    return solution;
-}
+//     return solution;
+// }
 
 export function solve_tspMST(coords) {
     console.log('Iniciando TSP con A* y heurística MST mejorada');
